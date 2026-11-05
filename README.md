@@ -42,7 +42,6 @@ main{max-width:1100px;margin:auto;padding:8px 18px 40px}.panel{background:rgba(2
     <div class="msg ai">Hey! Ich bin deine eigene KI. Du kannst jetzt auch Bilder in den Chat schicken.</div>
   </div>
 
-  <!-- Bild-Vorschau -->
   <div id="chatImagePreview" class="image-preview-box hidden">
     <img id="chatImageImg" alt="Vorschau">
     <button class="remove-img" id="removeChatImage">×</button>
@@ -147,15 +146,15 @@ main{max-width:1100px;margin:auto;padding:8px 18px 40px}.panel{background:rgba(2
   </div>
   <div class="field">
     <label for="chatEndpoint">Chat-Endpunkt</label>
-    <input id="chatEndpoint" placeholder="https://api.groq.com/openai/v1/chat/completions">
+    <input id="chatEndpoint" value="https://api.groq.com/openai/v1/chat/completions">
   </div>
   <div class="field">
     <label for="chatModel">Chat-Modell</label>
-    <input id="chatModel" placeholder="openai/gpt-oss-20b">
+    <input id="chatModel" value="qwen/qwen3.8-27b">
   </div>
   <div class="field">
     <label for="chatApiKey">API-Schlüssel</label>
-    <input id="chatApiKey" type="password" placeholder="Dein Key">
+    <input id="chatApiKey" type="password" placeholder="Dein Groq API-Key">
   </div>
 
   <h3 style="margin-top:24px">Ollama (Computer)</h3>
@@ -184,24 +183,43 @@ const $ = id => document.getElementById(id);
 let pc=null,dc=null,micStream=null,camStream=null;
 let selectedFile=null,selectedText="";
 let chatHistory=[];
-let chatImageBase64=null; // für angehängtes Bild
+let chatImageBase64=null;
 
 const settingsKeys=["ollamaUrl","ollamaModel","chatEndpoint","chatModel","chatApiKey","ephemeralEndpoint","realtimeModel","voiceChoice","instructions"];
 
-function loadSettings(){settingsKeys.forEach(k=>{const v=localStorage.getItem("myai3_"+k);if(v!==null&&$(k))$(k).value=v;});}
-function saveSettings(){settingsKeys.forEach(k=>localStorage.setItem("myai3_"+k,$(k).value));$("settingsStatus").textContent="Gespeichert.";}
+function loadSettings(){
+  settingsKeys.forEach(k=>{
+    const v=localStorage.getItem("myai3_"+k);
+    if(v!==null && $(k)) $(k).value=v;
+  });
+  // Fallback: immer diese Werte setzen, falls noch nichts gespeichert ist
+  if(!$("chatEndpoint").value) $("chatEndpoint").value="https://api.groq.com/openai/v1/chat/completions";
+  if(!$("chatModel").value) $("chatModel").value="qwen/qwen3.8-27b";
+}
+function saveSettings(){
+  settingsKeys.forEach(k=>localStorage.setItem("myai3_"+k,$(k).value));
+  $("settingsStatus").textContent="Gespeichert.";
+}
 loadSettings();
 
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
 function showTab(id){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("hidden",v.id!==id));document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));}
 
 $("saveSettings").onclick=saveSettings;
-$("presetGroq").onclick=()=>{$("chatEndpoint").value="https://api.groq.com/openai/v1/chat/completions";$("chatModel").value="openai/gpt-oss-20b";$("settingsStatus").textContent="Groq geladen. Key eintragen und speichern.";};
-$("presetOpenRouter").onclick=()=>{$("chatEndpoint").value="https://openrouter.ai/api/v1/chat/completions";$("chatModel").value="meta-llama/llama-3.3-70b-instruct:free";$("settingsStatus").textContent="OpenRouter geladen.";};
+$("presetGroq").onclick=()=>{
+  $("chatEndpoint").value="https://api.groq.com/openai/v1/chat/completions";
+  $("chatModel").value="qwen/qwen3.8-27b";
+  $("settingsStatus").textContent="Groq + qwen/qwen3.8-27b geladen. Key eintragen und speichern.";
+};
+$("presetOpenRouter").onclick=()=>{
+  $("chatEndpoint").value="https://openrouter.ai/api/v1/chat/completions";
+  $("chatModel").value="nvidia/nemotron-3.5-super-vl:free";
+  $("settingsStatus").textContent="OpenRouter geladen.";
+};
 
 function addMsg(target,who,text){const el=document.createElement("div");el.className="msg "+who;el.textContent=text;$(target).appendChild(el);$(target).scrollTop=$(target).scrollHeight;}
 
-/* ===== Bild im Chat ===== */
+/* Bild im Chat */
 $("attachImage").onclick=()=>$("chatImageInput").click();
 $("chatImageInput").onchange=e=>{
   const file=e.target.files[0];
@@ -220,7 +238,7 @@ $("removeChatImage").onclick=()=>{
   $("chatImageInput").value="";
 };
 
-/* ===== CHAT ===== */
+/* CHAT */
 async function sendChat(){
   const text=$("chatInput").value.trim();
   if(!text && !chatImageBase64)return;
@@ -229,7 +247,6 @@ async function sendChat(){
   const displayText = text || "(Bild gesendet)";
   addMsg("chatLog","user",displayText);
 
-  // Nachricht für History vorbereiten
   let content;
   if(chatImageBase64){
     content = [];
@@ -255,16 +272,15 @@ async function sendChat(){
       const r=await fetch($("chatEndpoint").value.trim(),{
         method:"POST",headers,
         body:JSON.stringify({
-          model:$("chatModel").value.trim()||"openai/gpt-oss-20b",
+          model:$("chatModel").value.trim()||"qwen/qwen3.8-27b",
           messages:chatHistory,
           stream:false
         })
       });
-      if(!r.ok){const t=await r.text();throw new Error("Online-API: HTTP "+r.status+" – "+t.slice(0,200));}
+      if(!r.ok){const t=await r.text();throw new Error("Online-API: HTTP "+r.status+" – "+t.slice(0,250));}
       const j=await r.json();
       answer=j.choices?.[0]?.message?.content||JSON.stringify(j);
     } else {
-      // Ollama
       const base=$("ollamaUrl").value.trim().replace(/\/$/,"");
       const r=await fetch(base+"/api/chat",{
         method:"POST",
@@ -303,7 +319,7 @@ $("testOllama").onclick=async()=>{
   }catch(e){$("settingsStatus").textContent="Ollama nicht erreichbar: "+e.message;}
 };
 
-/* ===== LIVE (vereinfacht belassen) ===== */
+/* LIVE */
 function liveStatus(t){$("liveStatus").textContent="Status: "+t;}
 function logLive(t,who="ai"){addMsg("liveLog",who,t);}
 async function getEphemeralToken(){
@@ -344,7 +360,7 @@ $("cameraOn").onclick=cameraOn;$("cameraOff").onclick=cameraOff;
 $("sendFrame").onclick=()=>{if(!camStream||!dc||dc.readyState!=="open"){logLive("Zuerst Live + Kamera starten");return;}const v=$("liveVideo");if(!v.videoWidth)return;const c=document.createElement("canvas");c.width=v.videoWidth;c.height=v.videoHeight;c.getContext("2d").drawImage(v,0,0);const data=c.toDataURL("image/jpeg",0.72).split(",")[1];dc.send(JSON.stringify({type:"conversation.item.create",item:{type:"message",role:"user",content:[{type:"input_text",text:"Was siehst du auf dem Bild?"},{type:"input_image",image_url:"data:image/jpeg;base64,"+data}]}}));dc.send(JSON.stringify({type:"response.create"}));logLive("Bild gesendet","user");};
 
 /* Dateien */
-$("fileInput").onchange=async e=>{selectedFile=e.target.files[0];selectedText="";$("imagePreview").classList.add("hidden");$("downloadFile").disabled=!$selectedFile;$("useFileInChat").disabled=!selectedFile;if(!selectedFile){$("filePreview").textContent="Keine Datei";return;}$("filePreview").textContent=selectedFile.name+" · "+Math.round(selectedFile.size/1024)+" KB";if(selectedFile.type.startsWith("image/")){const url=URL.createObjectURL(selectedFile);$("imagePreview").src=url;$("imagePreview").classList.remove("hidden");$("useFileInChat").disabled=true;}else{selectedText=await selectedFile.text();$("filePreview").textContent=selectedFile.name+" · "+selectedText.length+" Zeichen";}};
+$("fileInput").onchange=async e=>{selectedFile=e.target.files[0];selectedText="";$("imagePreview").classList.add("hidden");$("downloadFile").disabled=!selectedFile;$("useFileInChat").disabled=!selectedFile;if(!selectedFile){$("filePreview").textContent="Keine Datei";return;}$("filePreview").textContent=selectedFile.name+" · "+Math.round(selectedFile.size/1024)+" KB";if(selectedFile.type.startsWith("image/")){const url=URL.createObjectURL(selectedFile);$("imagePreview").src=url;$("imagePreview").classList.remove("hidden");$("useFileInChat").disabled=true;}else{selectedText=await selectedFile.text();$("filePreview").textContent=selectedFile.name+" · "+selectedText.length+" Zeichen";}};
 $("downloadFile").onclick=()=>{if(!selectedFile)return;const a=document.createElement("a");a.href=URL.createObjectURL(selectedFile);a.download=selectedFile.name;a.click();};
 $("useFileInChat").onclick=()=>{if(!selectedText)return;showTab("chat");$("chatInput").value="Analysiere bitte:\n\n"+selectedText.slice(0,15000);};
 
