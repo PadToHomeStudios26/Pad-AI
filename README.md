@@ -23,19 +23,20 @@ body {
   font-size: 15px;
   min-height: 100vh;
   padding: 12px;
+  padding-bottom: 70px;
 }
 .container { max-width: 820px; margin: 0 auto; }
-header { margin-bottom: 14px; }
+header { margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
 header h1 { font-size: 22px; color: var(--accent); }
 header p { color: var(--muted); font-size: 13px; }
 
 .layout {
   display: flex;
   gap: 12px;
-  min-height: 70vh;
+  min-height: 65vh;
 }
 .sidebar {
-  width: 200px;
+  width: 180px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -43,12 +44,6 @@ header p { color: var(--muted); font-size: 13px; }
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-}
-.sidebar h3 {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 8px;
-  padding: 0 4px;
 }
 .new-btn {
   width: 100%;
@@ -61,10 +56,7 @@ header p { color: var(--muted); font-size: 13px; }
   cursor: pointer;
   margin-bottom: 10px;
 }
-.chat-list {
-  flex: 1;
-  overflow-y: auto;
-}
+.chat-list { flex: 1; overflow-y: auto; }
 .chat-item {
   padding: 9px 10px;
   border-radius: 8px;
@@ -99,7 +91,7 @@ header p { color: var(--muted); font-size: 13px; }
   border-radius: 11px;
   padding: 12px;
   margin-bottom: 10px;
-  min-height: 260px;
+  min-height: 250px;
 }
 .msg {
   padding: 10px 12px;
@@ -127,7 +119,7 @@ textarea {
   border-radius: 10px;
   padding: 11px;
   font: inherit;
-  min-height: 60px;
+  min-height: 55px;
   resize: vertical;
 }
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -166,15 +158,50 @@ button.primary {
   padding: 0;
 }
 
-.settings {
-  margin-top: 16px;
+/* Zahnrad Button unten rechts */
+.settings-btn {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  z-index: 50;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.modal.open { display: flex; }
+.modal-box {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 18px;
 }
-.settings h3 { color: var(--accent); margin-bottom: 12px; font-size: 15px; }
-.field { margin-bottom: 11px; }
+.modal-box h3 {
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.field { margin-bottom: 12px; }
 .field label {
   display: block;
   font-size: 12px;
@@ -186,11 +213,11 @@ button.primary {
   background: #0d1526;
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 9px 11px;
+  padding: 10px;
   border-radius: 8px;
   font: inherit;
 }
-.colors { display: flex; gap: 12px; flex-wrap: wrap; }
+.colors { display: flex; gap: 14px; }
 .colors input[type="color"] {
   width: 46px;
   height: 34px;
@@ -198,23 +225,28 @@ button.primary {
   background: none;
   padding: 0;
 }
-.hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.modal-actions button { flex: 1; }
+.hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
 
 @media (max-width: 700px) {
   .layout { flex-direction: column; }
   .sidebar {
     width: 100%;
-    max-height: 160px;
+    max-height: 140px;
   }
   .chat-list {
     display: flex;
     gap: 6px;
     overflow-x: auto;
-    padding-bottom: 4px;
   }
   .chat-item {
     flex-shrink: 0;
-    max-width: 140px;
+    max-width: 130px;
   }
 }
 </style>
@@ -222,19 +254,18 @@ button.primary {
 <body>
 <div class="container">
   <header>
-    <h1>PAD AI</h1>
-    <p>by Pad to Home Studios</p>
+    <div>
+      <h1>PAD AI</h1>
+      <p>by Pad to Home Studios</p>
+    </div>
   </header>
 
   <div class="layout">
-    <!-- Sidebar mit Chatverläufen -->
     <div class="sidebar">
       <button class="new-btn" id="newChat">＋ Neuer Chat</button>
-      <h3>Chatverläufe</h3>
       <div class="chat-list" id="chatList"></div>
     </div>
 
-    <!-- Hauptchat -->
     <div class="main">
       <div class="chat" id="chatLog"></div>
       <div class="input-area">
@@ -252,9 +283,14 @@ button.primary {
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Einstellungen -->
-  <div class="settings">
+<!-- Zahnrad Button -->
+<button class="settings-btn" id="openSettings">⚙️</button>
+
+<!-- Einstellungen Modal -->
+<div class="modal" id="settingsModal">
+  <div class="modal-box">
     <h3>Einstellungen</h3>
     <div class="field">
       <label>Chat-Endpunkt</label>
@@ -285,9 +321,9 @@ button.primary {
         </div>
       </div>
     </div>
-    <div class="row" style="margin-top:10px">
+    <div class="modal-actions">
+      <button id="resetBtn">Farben zurück</button>
       <button class="primary" id="saveBtn">Speichern</button>
-      <button id="resetBtn">Farben zurücksetzen</button>
     </div>
     <p class="hint">Chats, API-Schlüssel und Farben werden lokal gespeichert.</p>
   </div>
@@ -316,7 +352,7 @@ function uid() {
 
 function load() {
   try {
-    const raw = localStorage.getItem("padai_v8");
+    const raw = localStorage.getItem("padai_v9");
     if (raw) state = JSON.parse(raw);
   } catch(e) {}
   applyColors();
@@ -327,7 +363,7 @@ function load() {
 }
 
 function save() {
-  localStorage.setItem("padai_v8", JSON.stringify(state));
+  localStorage.setItem("padai_v9", JSON.stringify(state));
 }
 
 function applyColors() {
@@ -345,11 +381,7 @@ function applyColors() {
 }
 
 function createChat() {
-  const chat = {
-    id: uid(),
-    title: "Neuer Chat",
-    messages: []
-  };
+  const chat = { id: uid(), title: "Neuer Chat", messages: [] };
   state.chats.unshift(chat);
   state.currentId = chat.id;
   save();
@@ -383,7 +415,6 @@ function renderChat() {
   if (!chat) return;
   const log = $("chatLog");
   log.innerHTML = "";
-
   if (chat.messages.length === 0) {
     const el = document.createElement("div");
     el.className = "msg ai";
@@ -408,22 +439,14 @@ function renderChat() {
 async function send() {
   const text = $("userInput").value.trim();
   if (!text && !pendingImage) return;
-
   const chat = currentChat();
   if (!chat) return;
 
-  chat.messages.push({
-    role: "user",
-    text: text || "",
-    image: pendingImage || null
-  });
-
+  chat.messages.push({ role: "user", text: text || "", image: pendingImage || null });
   if (chat.title === "Neuer Chat" && text) {
-    chat.title = text.slice(0, 28) + (text.length > 28 ? "…" : "");
+    chat.title = text.slice(0, 26) + (text.length > 26 ? "…" : "");
   }
-
   $("userInput").value = "";
-  const imgToSend = pendingImage;
   pendingImage = null;
   $("previewBox").style.display = "none";
   $("fileInput").value = "";
@@ -431,7 +454,6 @@ async function send() {
   renderList();
   $("sendBtn").disabled = true;
 
-  // API Messages bauen
   const apiMessages = chat.messages.map(m => {
     if (m.role === "user" && m.image) {
       const content = [];
@@ -445,7 +467,6 @@ async function send() {
   try {
     const headers = { "Content-Type": "application/json" };
     if (state.settings.apiKey) headers.Authorization = "Bearer " + state.settings.apiKey;
-
     const res = await fetch(state.settings.endpoint, {
       method: "POST",
       headers,
@@ -455,18 +476,15 @@ async function send() {
         stream: false
       })
     });
-
     if (!res.ok) {
       const t = await res.text();
       throw new Error("HTTP " + res.status + " – " + t.slice(0, 140));
     }
     const data = await res.json();
-    const answer = data.choices?.[0]?.message?.content || "Keine Antwort.";
-    chat.messages.push({ role: "ai", text: answer });
+    chat.messages.push({ role: "ai", text: data.choices?.[0]?.message?.content || "Keine Antwort." });
   } catch (e) {
     chat.messages.push({ role: "ai", text: "Fehler: " + e.message });
   }
-
   $("sendBtn").disabled = false;
   save();
   renderChat();
@@ -476,17 +494,11 @@ async function send() {
 $("newChat").onclick = createChat;
 $("sendBtn").onclick = send;
 $("userInput").addEventListener("keydown", e => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    send();
-  }
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
 });
 $("clearBtn").onclick = () => {
   const chat = currentChat();
-  if (!chat) return;
-  chat.messages = [];
-  save();
-  renderChat();
+  if (chat) { chat.messages = []; save(); renderChat(); }
 };
 $("attachBtn").onclick = () => $("fileInput").click();
 $("fileInput").onchange = e => {
@@ -505,6 +517,11 @@ $("removeImg").onclick = () => {
   $("previewBox").style.display = "none";
   $("fileInput").value = "";
 };
+
+$("openSettings").onclick = () => $("settingsModal").classList.add("open");
+$("settingsModal").onclick = e => {
+  if (e.target === $("settingsModal")) $("settingsModal").classList.remove("open");
+};
 $("saveBtn").onclick = () => {
   state.settings.endpoint = $("setEndpoint").value.trim();
   state.settings.model = $("setModel").value.trim();
@@ -514,17 +531,13 @@ $("saveBtn").onclick = () => {
   state.settings.accent = $("setAccent").value;
   applyColors();
   save();
-  alert("Gespeichert!");
+  $("settingsModal").classList.remove("open");
 };
 $("resetBtn").onclick = () => {
   $("setBg").value = "#0b1020";
   $("setText").value = "#edf3ff";
   $("setAccent").value = "#d4af37";
-  applyColors();
 };
-$("setBg").oninput = () => document.documentElement.style.setProperty("--bg", $("setBg").value);
-$("setText").oninput = () => document.documentElement.style.setProperty("--text", $("setText").value);
-$("setAccent").oninput = () => document.documentElement.style.setProperty("--accent", $("setAccent").value);
 
 load();
 </script>
