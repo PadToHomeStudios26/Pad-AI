@@ -2,369 +2,642 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#101522">
-<title>Meine eigene KI Plus 3.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>PAD AI – by Pad to Home Studios</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#151d30;--panel2:#1b2740;--line:#2a3855;--text:#edf3ff;--muted:#9eacc7;--accent:#7c9cff;--good:#48d6a0;--bad:#ff7272}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#182747 0,#0b1020 48%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-header{padding:22px 18px 14px;max-width:1100px;margin:auto}h1{font-size:clamp(25px,5vw,38px);margin:0 0 5px}header p{color:var(--muted);margin:0}
-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.tab,button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 15px;border-radius:12px;font-weight:650;cursor:pointer}.tab.active{background:var(--accent);color:#081126;border-color:transparent}
-main{max-width:1100px;margin:auto;padding:8px 18px 40px}.panel{background:rgba(21,29,48,.94);border:1px solid var(--line);border-radius:18px;padding:17px;margin:12px 0;box-shadow:0 14px 40px #0003}.hidden{display:none!important}.muted,.hint{color:var(--muted);font-size:13px;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px;margin:10px 0}.field label{font-size:13px;color:var(--muted)}input,textarea,select{width:100%;background:#0d1526;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}textarea{min-height:95px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row button{flex:0 0 auto}.primary{background:var(--accent);color:#081126;border-color:transparent}.danger{border-color:#743d4a;background:#3a1c2a}.status{padding:10px 12px;border-radius:10px;background:#0d1526;border:1px solid var(--line);margin:10px 0;font-size:13px}.chat{height:330px;overflow:auto;background:#0d1526;border:1px solid var(--line);border-radius:12px;padding:12px}.msg{padding:10px 12px;border-radius:12px;margin:8px 0;max-width:92%;white-space:pre-wrap;overflow-wrap:anywhere}.user{background:#263b68;margin-left:auto}.ai{background:#202c43}.videoWrap{background:#05080f;border-radius:14px;overflow:hidden;min-height:180px;display:grid;place-items:center;position:relative}video{width:100%;max-height:420px;object-fit:contain}#remoteAudio{display:none}.pill{display:inline-block;padding:4px 9px;border-radius:99px;background:#263653;color:#cbd8f5;font-size:12px}.foot{margin-top:18px;color:var(--muted);font-size:12px}button:disabled{opacity:.45;cursor:not-allowed}
-.preset{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.preset button{font-size:13px;padding:8px 12px}
-.warning{background:#3a1c2a;border:1px solid #743d4a;color:#ffb4b4;padding:10px 12px;border-radius:10px;font-size:13px;margin:10px 0;line-height:1.45}
-.image-preview-box{margin:10px 0;position:relative;display:inline-block}
-.image-preview-box img{max-width:180px;max-height:140px;border-radius:12px;border:1px solid var(--line)}
-.image-preview-box .remove-img{position:absolute;top:-8px;right:-8px;background:#ff7272;color:#000;border:none;border-radius:50%;width:26px;height:26px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-@media(max-width:560px){header{padding-top:17px}.panel{padding:13px}.tab{flex:1;padding:10px 8px}}
+  :root {
+    --bg: #050505;
+    --panel: #0d0d0d;
+    --sidebar: #0a0a0a;
+    --text: #f0f0f0;
+    --muted: #a0a0a0;
+    --accent: #d4af37;
+    --accent-hover: #e8c547;
+    --border: #1f1f1f;
+    --user-bubble: #1a1a1a;
+    --ai-bubble: #111111;
+    --font-size: 15px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: var(--font-size);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    width: 280px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.25s ease;
+    z-index: 100;
+  }
+  #sidebar.collapsed { margin-left: -280px; }
+
+  .sidebar-header {
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
+  .brand small {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .new-chat-btn {
+    margin: 12px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 11px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    width: calc(100% - 24px);
+  }
+  .new-chat-btn:hover { background: var(--accent-hover); }
+
+  .chat-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .chat-item {
+    padding: 11px 12px;
+    border-radius: 9px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    font-size: 13.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--muted);
+  }
+  .chat-item:hover, .chat-item.active {
+    background: #161616;
+    color: var(--text);
+  }
+  .chat-item.active { border-left: 3px solid var(--accent); }
+
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .sidebar-footer button {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  /* Main */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    background: var(--panel);
+  }
+  .toggle-sidebar {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  .current-title {
+    font-weight: 600;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Chat area */
+  #chatArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .msg {
+    max-width: 780px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .msg.user {
+    background: var(--user-bubble);
+    align-self: flex-end;
+    border: 1px solid var(--border);
+  }
+  .msg.ai {
+    background: var(--ai-bubble);
+    align-self: flex-start;
+    border: 1px solid var(--border);
+  }
+  .msg .role {
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  /* Input */
+  .input-area {
+    border-top: 1px solid var(--border);
+    padding: 14px 16px;
+    background: var(--panel);
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  #userInput {
+    flex: 1;
+    background: #111;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 12px 14px;
+    resize: none;
+    min-height: 48px;
+    max-height: 140px;
+    font: inherit;
+  }
+  .send-btn, .img-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .img-btn { background: #222; color: var(--text); border: 1px solid var(--border); }
+
+  .image-preview {
+    margin-bottom: 10px;
+    position: relative;
+    display: inline-block;
+  }
+  .image-preview img {
+    max-height: 120px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .image-preview button {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff5555;
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  /* Settings Modal */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+  .modal.open { display: flex; }
+  .modal-content {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 92%;
+    max-width: 420px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .modal h2 { margin-bottom: 16px; color: var(--accent); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .field input, .field select {
+    width: 100%;
+    background: #111;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font: inherit;
+  }
+  .color-row {
+    display: flex;
+    gap: 10px;
+  }
+  .color-row input[type="color"] {
+    width: 50px;
+    height: 38px;
+    padding: 2px;
+    border: none;
+    background: none;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .btn-row button {
+    flex: 1;
+    padding: 11px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-secondary { background: #222; color: var(--text); border: 1px solid var(--border); }
+
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
 </style>
 </head>
 <body>
-<header>
-  <h1>Meine eigene KI <span class="pill">PLUS 3.0</span></h1>
-  <p>Dein persönliches KI-Studio – optimiert für iPad, iPhone und Computer.</p>
-  <nav>
-    <button class="tab active" data-tab="chat">💬 Chat</button>
-    <button class="tab" data-tab="live">🎙️ Live-Modus</button>
-    <button class="tab" data-tab="files">📁 Dateien & Kamera</button>
-    <button class="tab" data-tab="settings">⚙️ Einstellungen</button>
-  </nav>
-</header>
-<main>
-<section id="chat" class="view">
- <div class="panel">
-  <h2>Chat mit deiner KI</h2>
-  <div class="row">
-   <span class="pill">Online-API oder Ollama</span>
-   <span class="pill">Bilder möglich</span>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      PAD AI
+      <small>by Pad to Home Studios</small>
+    </div>
   </div>
-  <div id="chatLog" class="chat" aria-live="polite">
-    <div class="msg ai">Hey! Ich bin deine eigene KI. Du kannst jetzt auch Bilder in den Chat schicken.</div>
+  <button class="new-chat-btn" id="newChat">＋ Neue Unterhaltung</button>
+  <div class="chat-list" id="chatList"></div>
+  <div class="sidebar-footer">
+    <button id="openSettings">⚙️ Einstellungen</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <button class="toggle-sidebar" id="toggleSidebar">☰</button>
+    <div class="current-title" id="currentTitle">Neue Unterhaltung</div>
   </div>
 
-  <div id="chatImagePreview" class="image-preview-box hidden">
-    <img id="chatImageImg" alt="Vorschau">
-    <button class="remove-img" id="removeChatImage">×</button>
-  </div>
+  <div id="chatArea"></div>
 
-  <div class="field">
-    <label for="chatInput">Deine Nachricht</label>
-    <textarea id="chatInput" placeholder="Was möchtest du wissen? (Bild optional anhängen)"></textarea>
+  <div class="input-area">
+    <div id="imagePreviewBox" class="image-preview" style="display:none">
+      <img id="previewImg" alt="Vorschau">
+      <button id="removeImage">×</button>
+    </div>
+    <div class="input-row">
+      <textarea id="userInput" placeholder="Nachricht schreiben..." rows="1"></textarea>
+      <button class="img-btn" id="attachBtn" title="Bild anhängen">📷</button>
+      <button class="send-btn" id="sendBtn">➤</button>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+    </div>
   </div>
-  <div class="row">
-    <button class="primary" id="sendChat">Senden</button>
-    <button id="attachImage">📷 Bild anhängen</button>
-    <button id="clearChat">Chat leeren</button>
-    <input type="file" id="chatImageInput" accept="image/*" class="hidden">
-  </div>
-  <p class="hint">Auf dem iPad am besten Online-API nutzen. Manche Modelle können Bilder verstehen (Vision).</p>
- </div>
-</section>
+</div>
 
-<section id="live" class="view hidden">
- <div class="panel">
-  <h2>🎙️ Echtzeit-Sprachgespräch</h2>
-  <p class="muted">Starte eine Unterhaltung mit Sprache. Optional Kamera nutzen.</p>
-  <div class="status" id="liveStatus">Status: Nicht verbunden</div>
-  <div class="grid">
-   <div>
+<!-- SETTINGS MODAL -->
+<div class="modal" id="settingsModal">
+  <div class="modal-content">
+    <h2>Einstellungen</h2>
+
     <div class="field">
-      <label for="ephemeralEndpoint">Token-Endpunkt</label>
-      <input id="ephemeralEndpoint" placeholder="https://dein-server.de/realtime-token">
+      <label>Chat-Endpunkt</label>
+      <input id="setEndpoint" value="https://api.groq.com/openai/v1/chat/completions">
     </div>
     <div class="field">
-      <label for="realtimeModel">Realtime-Modell</label>
-      <input id="realtimeModel" value="gpt-realtime">
+      <label>Modell</label>
+      <input id="setModel" value="qwen/qwen3.8-27b">
     </div>
     <div class="field">
-      <label for="voiceChoice">Stimme</label>
-      <select id="voiceChoice">
-        <option value="marin">Marin</option>
-        <option value="cedar">Cedar</option>
-        <option value="alloy">Alloy</option>
-        <option value="verse">Verse</option>
-        <option value="ash">Ash</option>
-        <option value="ballad">Ballad</option>
-      </select>
+      <label>API-Schlüssel</label>
+      <input id="setApiKey" type="password" placeholder="Dein Key">
     </div>
+
+    <hr style="border-color:var(--border); margin:18px 0">
+
     <div class="field">
-      <label for="instructions">Anweisungen</label>
-      <textarea id="instructions">Du bist meine persönliche KI. Antworte auf Deutsch, freundlich und klar.</textarea>
+      <label>Schriftgröße</label>
+      <input type="range" id="setFontSize" min="13" max="19" value="15">
     </div>
-    <div class="row">
-      <button class="primary" id="startLive">Live starten</button>
-      <button class="danger" id="stopLive" disabled>Beenden</button>
+
+    <div class="field">
+      <label>Farben anpassen</label>
+      <div class="color-row">
+        <div>
+          <small style="color:var(--muted)">Hintergrund</small><br>
+          <input type="color" id="setBg" value="#050505">
+        </div>
+        <div>
+          <small style="color:var(--muted)">Text</small><br>
+          <input type="color" id="setText" value="#f0f0f0">
+        </div>
+        <div>
+          <small style="color:var(--muted)">Akzent (Gold)</small><br>
+          <input type="color" id="setAccent" value="#d4af37">
+        </div>
+      </div>
     </div>
-   </div>
-   <div>
-    <div class="videoWrap">
-      <video id="liveVideo" autoplay playsinline muted></video>
-      <span id="videoPlaceholder" class="muted">Kamera aus</span>
+
+    <div class="btn-row">
+      <button class="btn-secondary" id="resetTheme">Standard</button>
+      <button class="btn-primary" id="saveSettings">Speichern</button>
     </div>
-    <div class="row" style="margin-top:10px">
-      <button id="cameraOn">Kamera an</button>
-      <button id="cameraOff" disabled>Kamera aus</button>
-      <button id="sendFrame" disabled>Bild senden</button>
-    </div>
-   </div>
+    <p class="hint">Alles wird nur lokal auf deinem Gerät gespeichert.</p>
   </div>
-  <audio id="remoteAudio" autoplay></audio>
-  <div class="field">
-    <label>Live-Log</label>
-    <div id="liveLog" class="chat" style="height:180px"></div>
-  </div>
- </div>
-</section>
-
-<section id="files" class="view hidden">
- <div class="panel">
-  <h2>📁 Dateien & Kamera</h2>
-  <div class="field">
-    <label for="fileInput">Datei auswählen</label>
-    <input id="fileInput" type="file" accept="image/*,.txt,.md,.js,.html,.css,.json,.csv">
-  </div>
-  <div id="filePreview" class="status">Noch keine Datei ausgewählt.</div>
-  <img id="imagePreview" class="hidden" alt="Vorschau" style="max-width:100%;max-height:360px;border-radius:12px;margin-top:10px">
-  <div class="row">
-    <button id="downloadFile" disabled>Herunterladen</button>
-    <button id="useFileInChat" disabled>Text in Chat</button>
-  </div>
- </div>
-</section>
-
-<section id="settings" class="view hidden">
- <div class="panel">
-  <h2>⚙️ Verbindungen</h2>
-  <div class="warning">
-    <strong>iPad-Hinweis:</strong> Für Online-Chat Groq oder OpenRouter nutzen. Ollama braucht einen Computer im gleichen WLAN.
-  </div>
-
-  <h3>Online-Chat</h3>
-  <div class="preset">
-    <button type="button" id="presetGroq">Groq</button>
-    <button type="button" id="presetOpenRouter">OpenRouter</button>
-  </div>
-  <div class="field">
-    <label for="chatEndpoint">Chat-Endpunkt</label>
-    <input id="chatEndpoint" value="https://api.groq.com/openai/v1/chat/completions">
-  </div>
-  <div class="field">
-    <label for="chatModel">Chat-Modell</label>
-    <input id="chatModel" value="qwen/qwen3.8-27b">
-  </div>
-  <div class="field">
-    <label for="chatApiKey">API-Schlüssel</label>
-    <input id="chatApiKey" type="password" placeholder="Dein Groq API-Key">
-  </div>
-
-  <h3 style="margin-top:24px">Ollama (Computer)</h3>
-  <div class="field">
-    <label for="ollamaUrl">Ollama-Adresse</label>
-    <input id="ollamaUrl" value="http://localhost:11434">
-  </div>
-  <div class="field">
-    <label for="ollamaModel">Ollama-Modell</label>
-    <input id="ollamaModel" value="qwen2.5:7b">
-  </div>
-
-  <div class="row" style="margin-top:16px">
-    <button class="primary" id="saveSettings">Speichern</button>
-    <button id="testOllama">Ollama testen</button>
-  </div>
-  <div id="settingsStatus" class="status">Einstellungen werden lokal gespeichert.</div>
- </div>
-</section>
-
-<p class="foot">Meine eigene KI Plus 3.0 · Bilder im Chat möglich</p>
-</main>
+</div>
 
 <script>
 const $ = id => document.getElementById(id);
-let pc=null,dc=null,micStream=null,camStream=null;
-let selectedFile=null,selectedText="";
-let chatHistory=[];
-let chatImageBase64=null;
 
-const settingsKeys=["ollamaUrl","ollamaModel","chatEndpoint","chatModel","chatApiKey","ephemeralEndpoint","realtimeModel","voiceChoice","instructions"];
+let state = {
+  chats: [],
+  currentId: null,
+  settings: {
+    endpoint: "https://api.groq.com/openai/v1/chat/completions",
+    model: "qwen/qwen3.8-27b",
+    apiKey: "",
+    fontSize: 15,
+    bg: "#050505",
+    text: "#f0f0f0",
+    accent: "#d4af37"
+  }
+};
 
-function loadSettings(){
-  settingsKeys.forEach(k=>{
-    const v=localStorage.getItem("myai3_"+k);
-    if(v!==null && $(k)) $(k).value=v;
+let pendingImage = null;
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function load() {
+  try {
+    const raw = localStorage.getItem("padai_v4");
+    if (raw) state = JSON.parse(raw);
+  } catch(e) {}
+  applyTheme();
+  if (state.chats.length === 0) createNewChat();
+  else if (!state.currentId) state.currentId = state.chats[0].id;
+  renderChatList();
+  renderCurrentChat();
+}
+
+function save() {
+  localStorage.setItem("padai_v4", JSON.stringify(state));
+}
+
+function applyTheme() {
+  const s = state.settings;
+  document.documentElement.style.setProperty("--bg", s.bg);
+  document.documentElement.style.setProperty("--panel", s.bg);
+  document.documentElement.style.setProperty("--sidebar", s.bg);
+  document.documentElement.style.setProperty("--text", s.text);
+  document.documentElement.style.setProperty("--accent", s.accent);
+  document.documentElement.style.setProperty("--accent-hover", s.accent);
+  document.documentElement.style.setProperty("--font-size", s.fontSize + "px");
+  $("setFontSize").value = s.fontSize;
+  $("setBg").value = s.bg;
+  $("setText").value = s.text;
+  $("setAccent").value = s.accent;
+  $("setEndpoint").value = s.endpoint;
+  $("setModel").value = s.model;
+  $("setApiKey").value = s.apiKey || "";
+}
+
+function createNewChat() {
+  const chat = {
+    id: uid(),
+    title: "Neue Unterhaltung",
+    messages: [],
+    created: Date.now()
+  };
+  state.chats.unshift(chat);
+  state.currentId = chat.id;
+  save();
+  renderChatList();
+  renderCurrentChat();
+}
+
+function getCurrentChat() {
+  return state.chats.find(c => c.id === state.currentId);
+}
+
+function renderChatList() {
+  const list = $("chatList");
+  list.innerHTML = "";
+  state.chats.forEach(chat => {
+    const el = document.createElement("div");
+    el.className = "chat-item" + (chat.id === state.currentId ? " active" : "");
+    el.textContent = chat.title || "Neue Unterhaltung";
+    el.onclick = () => {
+      state.currentId = chat.id;
+      save();
+      renderChatList();
+      renderCurrentChat();
+    };
+    list.appendChild(el);
   });
-  // Fallback: immer diese Werte setzen, falls noch nichts gespeichert ist
-  if(!$("chatEndpoint").value) $("chatEndpoint").value="https://api.groq.com/openai/v1/chat/completions";
-  if(!$("chatModel").value) $("chatModel").value="qwen/qwen3.8-27b";
 }
-function saveSettings(){
-  settingsKeys.forEach(k=>localStorage.setItem("myai3_"+k,$(k).value));
-  $("settingsStatus").textContent="Gespeichert.";
+
+function renderCurrentChat() {
+  const chat = getCurrentChat();
+  if (!chat) return;
+  $("currentTitle").textContent = chat.title;
+  const area = $("chatArea");
+  area.innerHTML = "";
+  if (chat.messages.length === 0) {
+    const welcome = document.createElement("div");
+    welcome.className = "msg ai";
+    welcome.innerHTML = `<div class="role">PAD AI</div>Hey! Ich bin PAD AI by Pad to Home Studios. Frag mich etwas oder häng ein Bild an.`;
+    area.appendChild(welcome);
+  } else {
+    chat.messages.forEach(m => {
+      const el = document.createElement("div");
+      el.className = "msg " + (m.role === "user" ? "user" : "ai");
+      el.innerHTML = `<div class="role">${m.role === "user" ? "Du" : "PAD AI"}</div>${escapeHtml(m.content)}`;
+      area.appendChild(el);
+    });
+  }
+  area.scrollTop = area.scrollHeight;
 }
-loadSettings();
 
-document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
-function showTab(id){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("hidden",v.id!==id));document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));}
+function escapeHtml(text) {
+  if (typeof text !== "string") return "";
+  return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
 
-$("saveSettings").onclick=saveSettings;
-$("presetGroq").onclick=()=>{
-  $("chatEndpoint").value="https://api.groq.com/openai/v1/chat/completions";
-  $("chatModel").value="qwen/qwen3.8-27b";
-  $("settingsStatus").textContent="Groq + qwen/qwen3.8-27b geladen. Key eintragen und speichern.";
-};
-$("presetOpenRouter").onclick=()=>{
-  $("chatEndpoint").value="https://openrouter.ai/api/v1/chat/completions";
-  $("chatModel").value="nvidia/nemotron-3.5-super-vl:free";
-  $("settingsStatus").textContent="OpenRouter geladen.";
-};
+async function sendMessage() {
+  const text = $("userInput").value.trim();
+  if (!text && !pendingImage) return;
 
-function addMsg(target,who,text){const el=document.createElement("div");el.className="msg "+who;el.textContent=text;$(target).appendChild(el);$(target).scrollTop=$(target).scrollHeight;}
+  const chat = getCurrentChat();
+  if (!chat) return;
 
-/* Bild im Chat */
-$("attachImage").onclick=()=>$("chatImageInput").click();
-$("chatImageInput").onchange=e=>{
-  const file=e.target.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    chatImageBase64=ev.target.result;
-    $("chatImageImg").src=chatImageBase64;
-    $("chatImagePreview").classList.remove("hidden");
+  const display = text || "(Bild)";
+  chat.messages.push({ role: "user", content: display });
+  if (chat.title === "Neue Unterhaltung" && text) {
+    chat.title = text.slice(0, 32) + (text.length > 32 ? "…" : "");
+  }
+  $("userInput").value = "";
+  renderCurrentChat();
+  renderChatList();
+
+  // Build content for API
+  let apiContent;
+  if (pendingImage) {
+    apiContent = [];
+    if (text) apiContent.push({ type: "text", text });
+    apiContent.push({ type: "image_url", image_url: { url: pendingImage } });
+  } else {
+    apiContent = text;
+  }
+
+  // We keep a simple history of last messages for the API
+  const apiMessages = chat.messages.slice(-12).map(m => ({
+    role: m.role === "user" ? "user" : "assistant",
+    content: m.content
+  }));
+  // Replace last user message with proper multimodal if needed
+  if (pendingImage) {
+    apiMessages[apiMessages.length - 1].content = apiContent;
+  }
+
+  pendingImage = null;
+  $("imagePreviewBox").style.display = "none";
+  $("sendBtn").disabled = true;
+
+  try {
+    const headers = { "Content-Type": "application/json" };
+    if (state.settings.apiKey) headers["Authorization"] = "Bearer " + state.settings.apiKey;
+
+    const res = await fetch(state.settings.endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model: state.settings.model,
+        messages: apiMessages,
+        stream: false
+      })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error("HTTP " + res.status + " – " + errText.slice(0, 180));
+    }
+    const data = await res.json();
+    const answer = data.choices?.[0]?.message?.content || "Keine Antwort erhalten.";
+    chat.messages.push({ role: "assistant", content: answer });
+  } catch (err) {
+    chat.messages.push({ role: "assistant", content: "Fehler: " + err.message });
+  }
+
+  $("sendBtn").disabled = false;
+  save();
+  renderCurrentChat();
+  renderChatList();
+}
+
+// Events
+$("newChat").onclick = createNewChat;
+$("toggleSidebar").onclick = () => $("sidebar").classList.toggle("collapsed");
+$("sendBtn").onclick = sendMessage;
+$("userInput").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+$("attachBtn").onclick = () => $("fileInput").click();
+$("fileInput").onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingImage = ev.target.result;
+    $("previewImg").src = pendingImage;
+    $("imagePreviewBox").style.display = "block";
   };
   reader.readAsDataURL(file);
 };
-$("removeChatImage").onclick=()=>{
-  chatImageBase64=null;
-  $("chatImagePreview").classList.add("hidden");
-  $("chatImageInput").value="";
+$("removeImage").onclick = () => {
+  pendingImage = null;
+  $("imagePreviewBox").style.display = "none";
+  $("fileInput").value = "";
 };
 
-/* CHAT */
-async function sendChat(){
-  const text=$("chatInput").value.trim();
-  if(!text && !chatImageBase64)return;
+$("openSettings").onclick = () => $("settingsModal").classList.add("open");
+$("settingsModal").onclick = e => { if (e.target === $("settingsModal")) $("settingsModal").classList.remove("open"); };
 
-  $("chatInput").value="";
-  const displayText = text || "(Bild gesendet)";
-  addMsg("chatLog","user",displayText);
-
-  let content;
-  if(chatImageBase64){
-    content = [];
-    if(text) content.push({type:"text",text:text});
-    content.push({type:"image_url",image_url:{url:chatImageBase64}});
-  } else {
-    content = text;
-  }
-
-  chatHistory.push({role:"user",content:content});
-  const hadImage = !!chatImageBase64;
-  chatImageBase64=null;
-  $("chatImagePreview").classList.add("hidden");
-  $("chatImageInput").value="";
-  $("sendChat").disabled=true;
-
-  try{
-    let answer="";
-    if($("chatEndpoint").value.trim()){
-      const headers={"Content-Type":"application/json"};
-      if($("chatApiKey").value.trim()) headers.Authorization="Bearer "+$("chatApiKey").value.trim();
-
-      const r=await fetch($("chatEndpoint").value.trim(),{
-        method:"POST",headers,
-        body:JSON.stringify({
-          model:$("chatModel").value.trim()||"qwen/qwen3.8-27b",
-          messages:chatHistory,
-          stream:false
-        })
-      });
-      if(!r.ok){const t=await r.text();throw new Error("Online-API: HTTP "+r.status+" – "+t.slice(0,250));}
-      const j=await r.json();
-      answer=j.choices?.[0]?.message?.content||JSON.stringify(j);
-    } else {
-      const base=$("ollamaUrl").value.trim().replace(/\/$/,"");
-      const r=await fetch(base+"/api/chat",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:$("ollamaModel").value.trim(),
-          messages:chatHistory,
-          stream:false
-        })
-      });
-      if(!r.ok)throw new Error("Ollama: HTTP "+r.status);
-      const j=await r.json();
-      answer=j.message?.content||"Keine Antwort.";
-    }
-    chatHistory.push({role:"assistant",content:answer});
-    addMsg("chatLog","ai",answer);
-  }catch(e){
-    let msg="Verbindung fehlgeschlagen: "+e.message;
-    if(hadImage) msg+="\n\nHinweis: Nicht alle Modelle können Bilder verstehen.";
-    addMsg("chatLog","ai",msg);
-  }finally{
-    $("sendChat").disabled=false;
-  }
-}
-
-$("sendChat").onclick=sendChat;
-$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}});
-$("clearChat").onclick=()=>{$("chatLog").innerHTML="";chatHistory=[];addMsg("chatLog","ai","Chat geleert.");};
-
-$("testOllama").onclick=async()=>{
-  try{
-    const r=await fetch($("ollamaUrl").value.replace(/\/$/,"")+"/api/tags");
-    if(!r.ok)throw new Error("HTTP "+r.status);
-    const j=await r.json();
-    $("settingsStatus").textContent="Ollama erreichbar: "+(j.models||[]).map(x=>x.name).join(", ");
-  }catch(e){$("settingsStatus").textContent="Ollama nicht erreichbar: "+e.message;}
+$("saveSettings").onclick = () => {
+  state.settings.endpoint = $("setEndpoint").value.trim();
+  state.settings.model = $("setModel").value.trim();
+  state.settings.apiKey = $("setApiKey").value.trim();
+  state.settings.fontSize = parseInt($("setFontSize").value);
+  state.settings.bg = $("setBg").value;
+  state.settings.text = $("setText").value;
+  state.settings.accent = $("setAccent").value;
+  applyTheme();
+  save();
+  $("settingsModal").classList.remove("open");
 };
 
-/* LIVE */
-function liveStatus(t){$("liveStatus").textContent="Status: "+t;}
-function logLive(t,who="ai"){addMsg("liveLog",who,t);}
-async function getEphemeralToken(){
-  const endpoint=$("ephemeralEndpoint").value.trim();
-  if(!endpoint)throw new Error("Token-Endpunkt fehlt");
-  const r=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:$("realtimeModel").value.trim()})});
-  if(!r.ok)throw new Error("Token HTTP "+r.status);
-  const j=await r.json();
-  const token=j.client_secret?.value||j.value||j.client_secret;
-  if(!token)throw new Error("Kein Token");
-  return token;
-}
-async function startLive(){
-  $("startLive").disabled=true;liveStatus("Verbinde…");
-  try{
-    const token=await getEphemeralToken();
-    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
-    pc=new RTCPeerConnection();
-    pc.ontrack=e=>{$("remoteAudio").srcObject=e.streams[0];$("remoteAudio").play().catch(()=>{});};
-    micStream.getTracks().forEach(t=>pc.addTrack(t,micStream));
-    dc=pc.createDataChannel("oai-events");
-    dc.onopen=()=>{dc.send(JSON.stringify({type:"session.update",session:{type:"realtime",instructions:$("instructions").value,output_modalities:["audio"],audio:{output:{voice:$("voiceChoice").value}}}}));logLive("Verbunden.");};
-    const offer=await pc.createOffer();await pc.setLocalDescription(offer);
-    await new Promise(r=>{if(pc.iceGatheringState==="complete")return r();const t=setTimeout(r,4000);pc.addEventListener("icegatheringstatechange",()=>{if(pc.iceGatheringState==="complete"){clearTimeout(t);r();}});});
-    const sdpR=await fetch("https://api.openai.com/v1/realtime/calls?model="+encodeURIComponent($("realtimeModel").value.trim()||"gpt-realtime"),{method:"POST",body:pc.localDescription.sdp,headers:{"Authorization":"Bearer "+token,"Content-Type":"application/sdp"}});
-    if(!sdpR.ok)throw new Error("Realtime HTTP "+sdpR.status);
-    await pc.setRemoteDescription({type:"answer",sdp:await sdpR.text()});
-    $("stopLive").disabled=false;liveStatus("Verbunden");
-  }catch(e){logLive("Fehler: "+e.message);stopLive(false);liveStatus("Nicht verbunden");}
-  finally{$("startLive").disabled=false;}
-}
-async function stopLive(update=true){if(dc)try{dc.close()}catch{}dc=null;if(pc)try{pc.close()}catch{}pc=null;if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;}$("remoteAudio").srcObject=null;$("stopLive").disabled=true;$("startLive").disabled=false;if(update)liveStatus("Beendet");}
-$("startLive").onclick=startLive;$("stopLive").onclick=()=>stopLive(true);
+$("resetTheme").onclick = () => {
+  $("setBg").value = "#050505";
+  $("setText").value = "#f0f0f0";
+  $("setAccent").value = "#d4af37";
+  $("setFontSize").value = 15;
+};
 
-async function cameraOn(){try{camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"},audio:false});$("liveVideo").srcObject=camStream;$("videoPlaceholder").classList.add("hidden");$("cameraOn").disabled=true;$("cameraOff").disabled=false;$("sendFrame").disabled=false;}catch(e){logLive("Kamera: "+e.message);}}
-function cameraOff(){if(camStream)camStream.getTracks().forEach(t=>t.stop());camStream=null;$("liveVideo").srcObject=null;$("videoPlaceholder").classList.remove("hidden");$("cameraOn").disabled=false;$("cameraOff").disabled=true;$("sendFrame").disabled=true;}
-$("cameraOn").onclick=cameraOn;$("cameraOff").onclick=cameraOff;
-$("sendFrame").onclick=()=>{if(!camStream||!dc||dc.readyState!=="open"){logLive("Zuerst Live + Kamera starten");return;}const v=$("liveVideo");if(!v.videoWidth)return;const c=document.createElement("canvas");c.width=v.videoWidth;c.height=v.videoHeight;c.getContext("2d").drawImage(v,0,0);const data=c.toDataURL("image/jpeg",0.72).split(",")[1];dc.send(JSON.stringify({type:"conversation.item.create",item:{type:"message",role:"user",content:[{type:"input_text",text:"Was siehst du auf dem Bild?"},{type:"input_image",image_url:"data:image/jpeg;base64,"+data}]}}));dc.send(JSON.stringify({type:"response.create"}));logLive("Bild gesendet","user");};
+$("setFontSize").oninput = () => {
+  document.documentElement.style.setProperty("--font-size", $("setFontSize").value + "px");
+};
 
-/* Dateien */
-$("fileInput").onchange=async e=>{selectedFile=e.target.files[0];selectedText="";$("imagePreview").classList.add("hidden");$("downloadFile").disabled=!selectedFile;$("useFileInChat").disabled=!selectedFile;if(!selectedFile){$("filePreview").textContent="Keine Datei";return;}$("filePreview").textContent=selectedFile.name+" · "+Math.round(selectedFile.size/1024)+" KB";if(selectedFile.type.startsWith("image/")){const url=URL.createObjectURL(selectedFile);$("imagePreview").src=url;$("imagePreview").classList.remove("hidden");$("useFileInChat").disabled=true;}else{selectedText=await selectedFile.text();$("filePreview").textContent=selectedFile.name+" · "+selectedText.length+" Zeichen";}};
-$("downloadFile").onclick=()=>{if(!selectedFile)return;const a=document.createElement("a");a.href=URL.createObjectURL(selectedFile);a.download=selectedFile.name;a.click();};
-$("useFileInChat").onclick=()=>{if(!selectedText)return;showTab("chat");$("chatInput").value="Analysiere bitte:\n\n"+selectedText.slice(0,15000);};
-
-window.addEventListener("beforeunload",()=>{stopLive(false);cameraOff();});
+load();
 </script>
 </body>
 </html>
