@@ -7,15 +7,15 @@
 <style>
   :root {
     --bg: #050505;
-    --panel: #0d0d0d;
-    --sidebar: #0a0a0a;
+    --panel: #0c0c0c;
+    --sidebar: #080808;
     --text: #f0f0f0;
-    --muted: #a0a0a0;
+    --muted: #999;
     --accent: #d4af37;
     --accent-hover: #e8c547;
-    --border: #1f1f1f;
-    --user-bubble: #1a1a1a;
-    --ai-bubble: #111111;
+    --border: #1c1c1c;
+    --user-bg: #1a1a1a;
+    --ai-bg: #111;
     --font-size: 15px;
   }
 
@@ -30,7 +30,7 @@
     display: flex;
   }
 
-  /* Sidebar */
+  /* ===== SIDEBAR ===== */
   #sidebar {
     width: 280px;
     background: var(--sidebar);
@@ -38,68 +38,67 @@
     display: flex;
     flex-direction: column;
     transition: margin-left 0.25s ease;
-    z-index: 100;
+    z-index: 50;
   }
   #sidebar.collapsed { margin-left: -280px; }
 
   .sidebar-header {
-    padding: 18px 16px;
+    padding: 18px 16px 14px;
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
   }
   .brand {
     font-weight: 700;
-    font-size: 17px;
+    font-size: 18px;
     color: var(--accent);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
   }
-  .brand small {
+  .brand span {
     display: block;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--muted);
     font-weight: 400;
     margin-top: 2px;
   }
 
-  .new-chat-btn {
+  .new-btn {
     margin: 12px;
     background: var(--accent);
     color: #000;
     border: none;
-    padding: 11px;
+    padding: 12px;
     border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
     width: calc(100% - 24px);
+    font-size: 14px;
   }
-  .new-chat-btn:hover { background: var(--accent-hover); }
+  .new-btn:hover { background: var(--accent-hover); }
 
   .chat-list {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
+    padding: 6px 8px;
   }
   .chat-item {
     padding: 11px 12px;
     border-radius: 9px;
     cursor: pointer;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     font-size: 13.5px;
+    color: var(--muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--muted);
   }
-  .chat-item:hover, .chat-item.active {
+  .chat-item:hover { background: #151515; color: var(--text); }
+  .chat-item.active {
     background: #161616;
     color: var(--text);
+    border-left: 3px solid var(--accent);
   }
-  .chat-item.active { border-left: 3px solid var(--accent); }
 
   .sidebar-footer {
-    padding: 12px;
+    padding: 10px;
     border-top: 1px solid var(--border);
   }
   .sidebar-footer button {
@@ -107,14 +106,13 @@
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 9px;
+    padding: 10px;
     border-radius: 8px;
     cursor: pointer;
-    margin-bottom: 6px;
     font-size: 13px;
   }
 
-  /* Main */
+  /* ===== MAIN ===== */
   #main {
     flex: 1;
     display: flex;
@@ -123,15 +121,15 @@
   }
 
   .topbar {
-    height: 56px;
+    height: 54px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    padding: 0 16px;
+    padding: 0 14px;
     gap: 12px;
     background: var(--panel);
   }
-  .toggle-sidebar {
+  .toggle-btn {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text);
@@ -141,7 +139,7 @@
     cursor: pointer;
     font-size: 18px;
   }
-  .current-title {
+  .title {
     font-weight: 600;
     flex: 1;
     white-space: nowrap;
@@ -149,49 +147,81 @@
     text-overflow: ellipsis;
   }
 
-  /* Chat area */
   #chatArea {
     flex: 1;
     overflow-y: auto;
     padding: 20px 16px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
   }
+
   .msg {
-    max-width: 780px;
+    max-width: 760px;
     padding: 12px 16px;
     border-radius: 14px;
     line-height: 1.55;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
   }
   .msg.user {
-    background: var(--user-bubble);
+    background: var(--user-bg);
     align-self: flex-end;
     border: 1px solid var(--border);
   }
   .msg.ai {
-    background: var(--ai-bubble);
+    background: var(--ai-bg);
     align-self: flex-start;
     border: 1px solid var(--border);
   }
   .msg .role {
     font-size: 11px;
     color: var(--accent);
-    margin-bottom: 4px;
     font-weight: 600;
+    margin-bottom: 5px;
+  }
+  .msg .content {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .msg img.chat-img {
+    max-width: 100%;
+    max-height: 280px;
+    border-radius: 10px;
+    margin-top: 8px;
+    display: block;
   }
 
   /* Input */
   .input-area {
     border-top: 1px solid var(--border);
-    padding: 14px 16px;
+    padding: 12px 14px;
     background: var(--panel);
+  }
+  .preview-box {
+    margin-bottom: 10px;
+    position: relative;
+    display: inline-block;
+  }
+  .preview-box img {
+    max-height: 110px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .preview-box button {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
   }
   .input-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: flex-end;
   }
   #userInput {
@@ -202,70 +232,62 @@
     border-radius: 12px;
     padding: 12px 14px;
     resize: none;
-    min-height: 48px;
-    max-height: 140px;
+    min-height: 46px;
+    max-height: 130px;
     font: inherit;
   }
-  .send-btn, .img-btn {
-    background: var(--accent);
-    color: #000;
-    border: none;
-    width: 48px;
-    height: 48px;
+  .icon-btn {
+    width: 46px;
+    height: 46px;
     border-radius: 12px;
+    border: none;
     cursor: pointer;
     font-size: 18px;
     flex-shrink: 0;
   }
-  .img-btn { background: #222; color: var(--text); border: 1px solid var(--border); }
-
-  .image-preview {
-    margin-bottom: 10px;
-    position: relative;
-    display: inline-block;
-  }
-  .image-preview img {
-    max-height: 120px;
-    border-radius: 10px;
+  .attach-btn {
+    background: #1a1a1a;
+    color: var(--text);
     border: 1px solid var(--border);
   }
-  .image-preview button {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #ff5555;
-    border: none;
-    color: white;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    cursor: pointer;
+  .send-btn {
+    background: var(--accent);
+    color: #000;
   }
 
-  /* Settings Modal */
+  /* Modal */
   .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.75);
+    background: rgba(0,0,0,0.7);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 200;
+    z-index: 100;
   }
   .modal.open { display: flex; }
-  .modal-content {
+  .modal-box {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 16px;
     width: 92%;
-    max-width: 420px;
+    max-width: 400px;
     max-height: 85vh;
     overflow-y: auto;
     padding: 20px;
   }
-  .modal h2 { margin-bottom: 16px; color: var(--accent); }
+  .modal-box h2 {
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-size: 18px;
+  }
   .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
   .field input, .field select {
     width: 100%;
     background: #111;
@@ -275,16 +297,16 @@
     border-radius: 8px;
     font: inherit;
   }
-  .color-row {
+  .colors {
     display: flex;
-    gap: 10px;
+    gap: 12px;
   }
-  .color-row input[type="color"] {
-    width: 50px;
-    height: 38px;
-    padding: 2px;
+  .colors input[type="color"] {
+    width: 48px;
+    height: 36px;
     border: none;
     background: none;
+    padding: 0;
   }
   .btn-row {
     display: flex;
@@ -299,55 +321,51 @@
     cursor: pointer;
     font-weight: 600;
   }
-  .btn-primary { background: var(--accent); color: #000; }
-  .btn-secondary { background: #222; color: var(--text); border: 1px solid var(--border); }
-
-  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+  .save-btn { background: var(--accent); color: #000; }
+  .reset-btn { background: #222; color: var(--text); border: 1px solid var(--border); }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.4; }
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside id="sidebar">
   <div class="sidebar-header">
     <div class="brand">
       PAD AI
-      <small>by Pad to Home Studios</small>
+      <span>by Pad to Home Studios</span>
     </div>
   </div>
-  <button class="new-chat-btn" id="newChat">＋ Neue Unterhaltung</button>
+  <button class="new-btn" id="newChat">＋ Neue Unterhaltung</button>
   <div class="chat-list" id="chatList"></div>
   <div class="sidebar-footer">
     <button id="openSettings">⚙️ Einstellungen</button>
   </div>
 </aside>
 
-<!-- MAIN -->
 <div id="main">
   <div class="topbar">
-    <button class="toggle-sidebar" id="toggleSidebar">☰</button>
-    <div class="current-title" id="currentTitle">Neue Unterhaltung</div>
+    <button class="toggle-btn" id="toggleSidebar">☰</button>
+    <div class="title" id="chatTitle">Neue Unterhaltung</div>
   </div>
 
   <div id="chatArea"></div>
 
   <div class="input-area">
-    <div id="imagePreviewBox" class="image-preview" style="display:none">
+    <div class="preview-box" id="previewBox" style="display:none">
       <img id="previewImg" alt="Vorschau">
-      <button id="removeImage">×</button>
+      <button id="removeImg">×</button>
     </div>
     <div class="input-row">
       <textarea id="userInput" placeholder="Nachricht schreiben..." rows="1"></textarea>
-      <button class="img-btn" id="attachBtn" title="Bild anhängen">📷</button>
-      <button class="send-btn" id="sendBtn">➤</button>
+      <button class="icon-btn attach-btn" id="attachBtn">📷</button>
+      <button class="icon-btn send-btn" id="sendBtn">➤</button>
       <input type="file" id="fileInput" accept="image/*" hidden>
     </div>
   </div>
 </div>
 
-<!-- SETTINGS MODAL -->
 <div class="modal" id="settingsModal">
-  <div class="modal-content">
+  <div class="modal-box">
     <h2>Einstellungen</h2>
 
     <div class="field">
@@ -363,16 +381,16 @@
       <input id="setApiKey" type="password" placeholder="Dein Key">
     </div>
 
-    <hr style="border-color:var(--border); margin:18px 0">
+    <div style="height:1px;background:var(--border);margin:16px 0"></div>
 
     <div class="field">
       <label>Schriftgröße</label>
-      <input type="range" id="setFontSize" min="13" max="19" value="15">
+      <input type="range" id="setFont" min="13" max="19" value="15">
     </div>
 
     <div class="field">
-      <label>Farben anpassen</label>
-      <div class="color-row">
+      <label>Farben</label>
+      <div class="colors">
         <div>
           <small style="color:var(--muted)">Hintergrund</small><br>
           <input type="color" id="setBg" value="#050505">
@@ -382,15 +400,15 @@
           <input type="color" id="setText" value="#f0f0f0">
         </div>
         <div>
-          <small style="color:var(--muted)">Akzent (Gold)</small><br>
+          <small style="color:var(--muted)">Akzent</small><br>
           <input type="color" id="setAccent" value="#d4af37">
         </div>
       </div>
     </div>
 
     <div class="btn-row">
-      <button class="btn-secondary" id="resetTheme">Standard</button>
-      <button class="btn-primary" id="saveSettings">Speichern</button>
+      <button class="reset-btn" id="resetTheme">Standard</button>
+      <button class="save-btn" id="saveSettings">Speichern</button>
     </div>
     <p class="hint">Alles wird nur lokal auf deinem Gerät gespeichert.</p>
   </div>
@@ -415,22 +433,24 @@ let state = {
 
 let pendingImage = null;
 
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
 
 function load() {
   try {
-    const raw = localStorage.getItem("padai_v4");
+    const raw = localStorage.getItem("padai_v5");
     if (raw) state = JSON.parse(raw);
-  } catch(e) {}
+  } catch (e) {}
   applyTheme();
-  if (state.chats.length === 0) createNewChat();
+  if (state.chats.length === 0) createChat();
   else if (!state.currentId) state.currentId = state.chats[0].id;
-  renderChatList();
-  renderCurrentChat();
+  renderList();
+  renderChat();
 }
 
 function save() {
-  localStorage.setItem("padai_v4", JSON.stringify(state));
+  localStorage.setItem("padai_v5", JSON.stringify(state));
 }
 
 function applyTheme() {
@@ -442,16 +462,17 @@ function applyTheme() {
   document.documentElement.style.setProperty("--accent", s.accent);
   document.documentElement.style.setProperty("--accent-hover", s.accent);
   document.documentElement.style.setProperty("--font-size", s.fontSize + "px");
-  $("setFontSize").value = s.fontSize;
-  $("setBg").value = s.bg;
-  $("setText").value = s.text;
-  $("setAccent").value = s.accent;
+
   $("setEndpoint").value = s.endpoint;
   $("setModel").value = s.model;
   $("setApiKey").value = s.apiKey || "";
+  $("setFont").value = s.fontSize;
+  $("setBg").value = s.bg;
+  $("setText").value = s.text;
+  $("setAccent").value = s.accent;
 }
 
-function createNewChat() {
+function createChat() {
   const chat = {
     id: uid(),
     title: "Neue Unterhaltung",
@@ -461,135 +482,152 @@ function createNewChat() {
   state.chats.unshift(chat);
   state.currentId = chat.id;
   save();
-  renderChatList();
-  renderCurrentChat();
+  renderList();
+  renderChat();
 }
 
-function getCurrentChat() {
+function currentChat() {
   return state.chats.find(c => c.id === state.currentId);
 }
 
-function renderChatList() {
+function renderList() {
   const list = $("chatList");
   list.innerHTML = "";
-  state.chats.forEach(chat => {
+  state.chats.forEach(c => {
     const el = document.createElement("div");
-    el.className = "chat-item" + (chat.id === state.currentId ? " active" : "");
-    el.textContent = chat.title || "Neue Unterhaltung";
+    el.className = "chat-item" + (c.id === state.currentId ? " active" : "");
+    el.textContent = c.title || "Neue Unterhaltung";
     el.onclick = () => {
-      state.currentId = chat.id;
+      state.currentId = c.id;
       save();
-      renderChatList();
-      renderCurrentChat();
+      renderList();
+      renderChat();
     };
     list.appendChild(el);
   });
 }
 
-function renderCurrentChat() {
-  const chat = getCurrentChat();
+function escapeHtml(str) {
+  if (typeof str !== "string") return "";
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function renderChat() {
+  const chat = currentChat();
   if (!chat) return;
-  $("currentTitle").textContent = chat.title;
+  $("chatTitle").textContent = chat.title;
   const area = $("chatArea");
   area.innerHTML = "";
+
   if (chat.messages.length === 0) {
     const welcome = document.createElement("div");
     welcome.className = "msg ai";
-    welcome.innerHTML = `<div class="role">PAD AI</div>Hey! Ich bin PAD AI by Pad to Home Studios. Frag mich etwas oder häng ein Bild an.`;
+    welcome.innerHTML = `<div class="role">PAD AI</div><div class="content">Hey! Ich bin PAD AI by Pad to Home Studios.\nSchreib mir etwas oder häng ein Bild an.</div>`;
     area.appendChild(welcome);
   } else {
     chat.messages.forEach(m => {
       const el = document.createElement("div");
       el.className = "msg " + (m.role === "user" ? "user" : "ai");
-      el.innerHTML = `<div class="role">${m.role === "user" ? "Du" : "PAD AI"}</div>${escapeHtml(m.content)}`;
+      let html = `<div class="role">${m.role === "user" ? "Du" : "PAD AI"}</div>`;
+      html += `<div class="content">${escapeHtml(m.text || "")}</div>`;
+      if (m.image) {
+        html += `<img class="chat-img" src="${m.image}" alt="Bild">`;
+      }
+      el.innerHTML = html;
       area.appendChild(el);
     });
   }
   area.scrollTop = area.scrollHeight;
 }
 
-function escapeHtml(text) {
-  if (typeof text !== "string") return "";
-  return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-async function sendMessage() {
+async function send() {
   const text = $("userInput").value.trim();
   if (!text && !pendingImage) return;
 
-  const chat = getCurrentChat();
+  const chat = currentChat();
   if (!chat) return;
 
-  const display = text || "(Bild)";
-  chat.messages.push({ role: "user", content: display });
+  // Nachricht speichern (mit Bild falls vorhanden)
+  chat.messages.push({
+    role: "user",
+    text: text || "",
+    image: pendingImage || null
+  });
+
   if (chat.title === "Neue Unterhaltung" && text) {
-    chat.title = text.slice(0, 32) + (text.length > 32 ? "…" : "");
+    chat.title = text.slice(0, 34) + (text.length > 34 ? "…" : "");
   }
+
   $("userInput").value = "";
-  renderCurrentChat();
-  renderChatList();
-
-  // Build content for API
-  let apiContent;
-  if (pendingImage) {
-    apiContent = [];
-    if (text) apiContent.push({ type: "text", text });
-    apiContent.push({ type: "image_url", image_url: { url: pendingImage } });
-  } else {
-    apiContent = text;
-  }
-
-  // We keep a simple history of last messages for the API
-  const apiMessages = chat.messages.slice(-12).map(m => ({
-    role: m.role === "user" ? "user" : "assistant",
-    content: m.content
-  }));
-  // Replace last user message with proper multimodal if needed
-  if (pendingImage) {
-    apiMessages[apiMessages.length - 1].content = apiContent;
-  }
-
+  const imageToSend = pendingImage;
   pendingImage = null;
-  $("imagePreviewBox").style.display = "none";
+  $("previewBox").style.display = "none";
+  $("fileInput").value = "";
+  renderChat();
+  renderList();
+
+  // API-Nachrichten vorbereiten
+  const apiMessages = [];
+  chat.messages.forEach(m => {
+    if (m.role === "user") {
+      if (m.image) {
+        const content = [];
+        if (m.text) content.push({ type: "text", text: m.text });
+        content.push({ type: "image_url", image_url: { url: m.image } });
+        apiMessages.push({ role: "user", content });
+      } else {
+        apiMessages.push({ role: "user", content: m.text });
+      }
+    } else {
+      apiMessages.push({ role: "assistant", content: m.text });
+    }
+  });
+
   $("sendBtn").disabled = true;
 
   try {
     const headers = { "Content-Type": "application/json" };
-    if (state.settings.apiKey) headers["Authorization"] = "Bearer " + state.settings.apiKey;
+    if (state.settings.apiKey) {
+      headers["Authorization"] = "Bearer " + state.settings.apiKey;
+    }
 
     const res = await fetch(state.settings.endpoint, {
       method: "POST",
       headers,
       body: JSON.stringify({
         model: state.settings.model,
-        messages: apiMessages,
+        messages: apiMessages.slice(-14),
         stream: false
       })
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      throw new Error("HTTP " + res.status + " – " + errText.slice(0, 180));
+      const t = await res.text();
+      throw new Error("HTTP " + res.status + " – " + t.slice(0, 160));
     }
+
     const data = await res.json();
-    const answer = data.choices?.[0]?.message?.content || "Keine Antwort erhalten.";
-    chat.messages.push({ role: "assistant", content: answer });
+    const answer = data.choices?.[0]?.message?.content || "Keine Antwort.";
+    chat.messages.push({ role: "assistant", text: answer });
   } catch (err) {
-    chat.messages.push({ role: "assistant", content: "Fehler: " + err.message });
+    chat.messages.push({ role: "assistant", text: "Fehler: " + err.message });
   }
 
   $("sendBtn").disabled = false;
   save();
-  renderCurrentChat();
-  renderChatList();
+  renderChat();
+  renderList();
 }
 
 // Events
-$("newChat").onclick = createNewChat;
+$("newChat").onclick = createChat;
 $("toggleSidebar").onclick = () => $("sidebar").classList.toggle("collapsed");
-$("sendBtn").onclick = sendMessage;
+$("sendBtn").onclick = send;
 $("userInput").addEventListener("keydown", e => {
-  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
 });
 
 $("attachBtn").onclick = () => $("fileInput").click();
@@ -600,24 +638,26 @@ $("fileInput").onchange = e => {
   reader.onload = ev => {
     pendingImage = ev.target.result;
     $("previewImg").src = pendingImage;
-    $("imagePreviewBox").style.display = "block";
+    $("previewBox").style.display = "block";
   };
   reader.readAsDataURL(file);
 };
-$("removeImage").onclick = () => {
+$("removeImg").onclick = () => {
   pendingImage = null;
-  $("imagePreviewBox").style.display = "none";
+  $("previewBox").style.display = "none";
   $("fileInput").value = "";
 };
 
 $("openSettings").onclick = () => $("settingsModal").classList.add("open");
-$("settingsModal").onclick = e => { if (e.target === $("settingsModal")) $("settingsModal").classList.remove("open"); };
+$("settingsModal").onclick = e => {
+  if (e.target === $("settingsModal")) $("settingsModal").classList.remove("open");
+};
 
 $("saveSettings").onclick = () => {
   state.settings.endpoint = $("setEndpoint").value.trim();
   state.settings.model = $("setModel").value.trim();
   state.settings.apiKey = $("setApiKey").value.trim();
-  state.settings.fontSize = parseInt($("setFontSize").value);
+  state.settings.fontSize = parseInt($("setFont").value);
   state.settings.bg = $("setBg").value;
   state.settings.text = $("setText").value;
   state.settings.accent = $("setAccent").value;
@@ -630,11 +670,11 @@ $("resetTheme").onclick = () => {
   $("setBg").value = "#050505";
   $("setText").value = "#f0f0f0";
   $("setAccent").value = "#d4af37";
-  $("setFontSize").value = 15;
+  $("setFont").value = 15;
 };
 
-$("setFontSize").oninput = () => {
-  document.documentElement.style.setProperty("--font-size", $("setFontSize").value + "px");
+$("setFont").oninput = () => {
+  document.documentElement.style.setProperty("--font-size", $("setFont").value + "px");
 };
 
 load();
