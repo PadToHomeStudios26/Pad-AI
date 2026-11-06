@@ -26,7 +26,7 @@ body {
   padding-bottom: 70px;
 }
 .container { max-width: 820px; margin: 0 auto; }
-header { margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+header { margin-bottom: 14px; }
 header h1 { font-size: 22px; color: var(--accent); }
 header p { color: var(--muted); font-size: 13px; }
 
@@ -97,12 +97,16 @@ header p { color: var(--muted); font-size: 13px; }
   padding: 10px 12px;
   border-radius: 11px;
   margin: 8px 0;
-  max-width: 90%;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  max-width: 92%;
+  position: relative;
+  user-select: text;
 }
 .msg.user { background: var(--user); margin-left: auto; }
 .msg.ai { background: var(--ai); }
+.msg-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .msg img {
   max-width: 100%;
   max-height: 220px;
@@ -110,6 +114,58 @@ header p { color: var(--muted); font-size: 13px; }
   margin-top: 6px;
   display: block;
 }
+
+/* Code Block */
+.code-block {
+  background: #0a0f1a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #121a2b;
+  font-size: 12px;
+  color: var(--muted);
+}
+.code-header button {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.code-body {
+  padding: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  color: #e0e6ff;
+}
+
+.copy-msg-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.copy-msg-btn:hover { opacity: 1; background: #1b2740; }
+
 .input-area { display: flex; flex-direction: column; gap: 8px; }
 textarea {
   width: 100%;
@@ -158,7 +214,6 @@ button.primary {
   padding: 0;
 }
 
-/* Zahnrad Button unten rechts */
 .settings-btn {
   position: fixed;
   bottom: 18px;
@@ -175,7 +230,6 @@ button.primary {
   z-index: 50;
 }
 
-/* Modal */
 .modal {
   position: fixed;
   inset: 0;
@@ -197,10 +251,7 @@ button.primary {
   overflow-y: auto;
   padding: 18px;
 }
-.modal-box h3 {
-  color: var(--accent);
-  margin-bottom: 14px;
-}
+.modal-box h3 { color: var(--accent); margin-bottom: 14px; }
 .field { margin-bottom: 12px; }
 .field label {
   display: block;
@@ -225,39 +276,23 @@ button.primary {
   background: none;
   padding: 0;
 }
-.modal-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-}
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
 .modal-actions button { flex: 1; }
 .hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
 
 @media (max-width: 700px) {
   .layout { flex-direction: column; }
-  .sidebar {
-    width: 100%;
-    max-height: 140px;
-  }
-  .chat-list {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-  }
-  .chat-item {
-    flex-shrink: 0;
-    max-width: 130px;
-  }
+  .sidebar { width: 100%; max-height: 140px; }
+  .chat-list { display: flex; gap: 6px; overflow-x: auto; }
+  .chat-item { flex-shrink: 0; max-width: 130px; }
 }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <div>
-      <h1>PAD AI</h1>
-      <p>by Pad to Home Studios</p>
-    </div>
+    <h1>PAD AI</h1>
+    <p>by Pad to Home Studios</p>
   </header>
 
   <div class="layout">
@@ -285,10 +320,8 @@ button.primary {
   </div>
 </div>
 
-<!-- Zahnrad Button -->
 <button class="settings-btn" id="openSettings">⚙️</button>
 
-<!-- Einstellungen Modal -->
 <div class="modal" id="settingsModal">
   <div class="modal-box">
     <h3>Einstellungen</h3>
@@ -352,7 +385,7 @@ function uid() {
 
 function load() {
   try {
-    const raw = localStorage.getItem("padai_v9");
+    const raw = localStorage.getItem("padai_v10");
     if (raw) state = JSON.parse(raw);
   } catch(e) {}
   applyColors();
@@ -363,7 +396,7 @@ function load() {
 }
 
 function save() {
-  localStorage.setItem("padai_v9", JSON.stringify(state));
+  localStorage.setItem("padai_v10", JSON.stringify(state));
 }
 
 function applyColors() {
@@ -410,26 +443,110 @@ function renderList() {
   });
 }
 
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    // kurzes Feedback
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  });
+}
+
+function formatContent(text) {
+  // Einfache Erkennung von Code-Blöcken mit ``` 
+  if (!text.includes("```")) {
+    return `<div class="msg-content">${escapeHtml(text)}</div>`;
+  }
+
+  let html = "";
+  const parts = text.split("```");
+  parts.forEach((part, i) => {
+    if (i % 2 === 0) {
+      // normaler Text
+      if (part.trim()) html += `<div class="msg-content">${escapeHtml(part)}</div>`;
+    } else {
+      // Code
+      let code = part;
+      let lang = "";
+      const firstLine = part.split("\n")[0];
+      if (firstLine && !firstLine.includes(" ") && firstLine.length < 20) {
+        lang = firstLine;
+        code = part.slice(firstLine.length).replace(/^\n/, "");
+      }
+      const id = "code-" + Math.random().toString(36).slice(2, 8);
+      html += `
+        <div class="code-block">
+          <div class="code-header">
+            <span>${lang || "Code"}</span>
+            <button onclick="copyText(document.getElementById('${id}').innerText)">Kopieren</button>
+          </div>
+          <div class="code-body" id="${id}">${escapeHtml(code.trim())}</div>
+        </div>`;
+    }
+  });
+  return html;
+}
+
+function escapeHtml(str) {
+  return (str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function renderChat() {
   const chat = currentChat();
   if (!chat) return;
   const log = $("chatLog");
   log.innerHTML = "";
+
   if (chat.messages.length === 0) {
     const el = document.createElement("div");
     el.className = "msg ai";
-    el.textContent = "Hey! Ich bin PAD AI by Pad to Home Studios.\nSchreib mir etwas oder häng ein Bild an.";
+    el.innerHTML = `<div class="msg-content">Hey! Ich bin PAD AI by Pad to Home Studios.\nSchreib mir etwas oder häng ein Bild an.</div>`;
     log.appendChild(el);
   } else {
     chat.messages.forEach(m => {
       const el = document.createElement("div");
       el.className = "msg " + m.role;
-      el.textContent = m.text || "";
+
+      if (m.role === "ai") {
+        el.innerHTML = formatContent(m.text || "");
+        // Kopieren-Button für die ganze Nachricht
+        const btn = document.createElement("button");
+        btn.className = "copy-msg-btn";
+        btn.textContent = "Kopieren";
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          copyText(m.text || "");
+          btn.textContent = "Kopiert!";
+          setTimeout(() => btn.textContent = "Kopieren", 1200);
+        };
+        el.appendChild(btn);
+      } else {
+        el.innerHTML = `<div class="msg-content">${escapeHtml(m.text || "")}</div>`;
+      }
+
       if (m.image) {
         const img = document.createElement("img");
         img.src = m.image;
         el.appendChild(img);
       }
+
+      // Doppelklick = ganzen Text markieren
+      el.addEventListener("dblclick", () => {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      });
+
       log.appendChild(el);
     });
   }
